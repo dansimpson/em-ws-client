@@ -8,8 +8,8 @@ spec = Gem::Specification.new do |s|
   s.description = "A simple, evented WebSocket client for your ruby projects"
   s.has_rdoc = true
   
-  s.add_dependency("eventmachine", ">= 0.12.10")
-  s.add_dependency("state_machine", ">= 1.0.0")
+  s.add_dependency("eventmachine", "= 0.12.10")
+  s.add_dependency("state_machine", "= 1.0.2")
 
   s.authors = ["Dan Simpson"]
 

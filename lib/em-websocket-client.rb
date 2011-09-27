@@ -1,8 +1,6 @@
 require "rubygems"
-require "bundler"
-
-Bundler.require
-
+require "eventmachine"
+require "state_machine"
 require "uri"
 require "digest/sha1"
 require "base64"

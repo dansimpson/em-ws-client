@@ -6,12 +6,11 @@ require "em-websocket-client"
 dec = EM::Draft10Decoder.new
 enc = EM::Draft10Encoder.new
 
-
 puts dec.decode(enc.encode("monkey"))
 
 EM.run do
 
-  conn = EM::WebSocketClient.new("ws://dev.shove.io:8080/test")
+  conn = EM::WebSocketClient.new("ws://localhost:8080/test")
   puts conn.state
   puts conn.disconnected?
 
