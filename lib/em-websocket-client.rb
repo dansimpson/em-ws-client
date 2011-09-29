@@ -72,6 +72,7 @@ module EM
 
       @uri = URI.parse(uri)
       @origin = origin
+      @queue = []
 
       @encoder = Draft10Encoder.new
       @decoder = Draft10Decoder.new
@@ -120,11 +121,14 @@ module EM
     # Send a WebSocket frame to the remote
     # host.
     def send_data data
-      connection.send_data(@encoder.encode(data))
+      if established?
+        connection.send_data(@encoder.encode(data))
+      else
+        @queue << data
+      end
     end
 
     private
-
 
     # Connect to the remote host and synchonize the connection
     # and this client object
@@ -152,6 +156,10 @@ module EM
     def on_established
       if @open_handler
         @open_handler.call
+      end
+      
+      while !@queue.empty?
+        send_data @queue.shift
       end
     end
 
