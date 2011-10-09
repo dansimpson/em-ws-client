@@ -1,11 +1,11 @@
 spec = Gem::Specification.new do |s|
-  s.name = "em-websocket-client"
+  s.name = "em-ws-client"
   s.version = "0.1"
   s.date = "2011-09-26"
   s.summary = "EventMachine WebSocket Client"
   s.email = "dan@shove.io"
-  s.homepage = "https://github.com/dansimpson/em-websocket-client"
-  s.description = "A simple, evented WebSocket client for your ruby projects"
+  s.homepage = "https://github.com/dansimpson/em-ws-client"
+  s.description = "A simple, fun, evented WebSocket client for your ruby projects"
   s.has_rdoc = true
   
   s.add_dependency("eventmachine", "= 0.12.10")

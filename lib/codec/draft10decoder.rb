@@ -39,7 +39,7 @@ module EM
       # if this is a message fragment
       @chunked = ((h1 & 0x80) != 0x80)
 
-      # used to keep track of our position
+      # used to keep track of our position in the buffer
       offset = 2
 
       # see above for possible opcodes
@@ -109,9 +109,9 @@ module EM
       when CLOSE
         false #TODO
       when PING
-        false #TODO
+        false #TODO send pong
       when PONG
-        false #TODO
+        false
       else
         false
       end
