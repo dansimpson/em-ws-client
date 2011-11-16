@@ -9,6 +9,8 @@ $ gem install em-ws-client
 # Establishing a Connection
 
 ```ruby
+require "em-ws-client"
+
 EM.run do
 
   # Establish the connection

@@ -1,6 +1,6 @@
 $: << File.dirname(__FILE__) + "/../lib/"
 
-require "em-websocket-client"
+require "em-ws-client"
 
 
 dec = EM::Draft10Decoder.new
