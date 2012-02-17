@@ -11,7 +11,7 @@ require "codec/draft10decoder.rb"
 module EM
   class WebSocketClient
     
-    Version = "0.1.1"
+    Version = "0.1.2"
 
     class WebSocketConnection < EM::Connection
 

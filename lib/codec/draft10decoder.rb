@@ -76,7 +76,7 @@ module EM
       end
 
       # Read the important bits
-      payload = @buffer.unpack("@#{offset}C*")
+      payload = @buffer.unpack("@#{offset}C#{length}")
 
       # Unmask the data if it's masked
       if masked
@@ -100,7 +100,7 @@ module EM
       when TEXT_FRAME
         unless @chunked
           @buffer = ""
-          #@buffer.slice!(offset + length, -1)
+          @buffer.slice!(offset + length)
           return payload
         end
         false
