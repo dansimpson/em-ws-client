@@ -1,5 +1,5 @@
 # EM WebSocket Client
-Mimics the browser client implementation to some degree.  Currently implements hixie draft 10.
+Rfc6455 WebSocket client for ruby.  Almost 100% Spec compliant (see autobahn tests).
 
 # Installing
 ```bash
@@ -22,6 +22,22 @@ EM.run do
 
   conn.onclose do
     # Handle close event
+  end
+
+  # Echo!
+  conn.onmessage do |msg, binary|
+    if binary
+      conn.send_data msg, true
+    else
+      conn.send_data msg
+    end
+  end
+
+  conn.onping do |msg|
+    # we automatically respond, but if you want...
+  end
+
+  conn.onerror do |code, message|
   end
 
 end

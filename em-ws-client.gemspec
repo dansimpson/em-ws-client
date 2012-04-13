@@ -9,7 +9,6 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc = true
   
   s.add_dependency("eventmachine", "~> 1.0.0.beta.4")
-  s.add_dependency("state_machine", "~> 1.0.2")
 
   s.authors = ["Dan Simpson"]
 
