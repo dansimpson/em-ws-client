@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>em-ws-client by dansimpson</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/dansimpson/em-ws-client">Fork On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/dansimpson/em-ws-client/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/dansimpson/em-ws-client/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>em-ws-client</h1>
+          <p>RFC 6455 Compliant WebSocket client for ruby</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/dansimpson">dansimpson</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h2>em-ws-client</h2>
+
+<p>RFC 6455 Compliant WebSocket client for ruby.  See report for compliance: <a href="http://dansimpson.github.com/em-ws-client/autobahn/report.html">View Autobahn Report</a></p>
+
+<h2>Installation</h2>
+
+<div class="highlight">
+<pre><span class="nv">$ </span>gem install em-ws-client
+</pre>
+</div>
+
+
+<h2>Sending and Receiving Messages</h2>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s2">"em-ws-client"</span>
+
+<span class="no">EM</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span>
+
+  <span class="c1"># Establish the connection</span>
+  <span class="n">ws</span> <span class="o">=</span> <span class="no">EM</span><span class="o">::</span><span class="no">WebSocketClient</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">"ws://server/path"</span><span class="p">)</span>
+
+  <span class="c1"># Simple echo</span>
+  <span class="c1"># If the binary flag is set, then</span>
+  <span class="c1"># the message is a string encoded as ASCII_8BIT</span>
+  <span class="c1"># otherwise it's encoded as UTF-8</span>
+  <span class="n">ws</span><span class="o">.</span><span class="n">onmessage</span> <span class="k">do</span> <span class="o">|</span><span class="n">msg</span><span class="p">,</span> <span class="n">binary</span><span class="o">|</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">send_message</span> <span class="n">msg</span><span class="p">,</span> <span class="n">binary</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Send a text message</span>
+  <span class="n">ws</span><span class="o">.</span><span class="n">send_message</span> <span class="s2">"hello!"</span>
+
+  <span class="c1"># Send a binary message</span>
+  <span class="n">ws</span><span class="o">.</span><span class="n">send_message</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">].</span><span class="n">pack</span><span class="p">(</span><span class="s2">"NnC"</span><span class="p">),</span> <span class="kp">true</span>
+
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<h2>Control Events</h2>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s2">"em-ws-client"</span>
+
+<span class="no">EM</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span>
+
+  <span class="c1"># Establish the connection</span>
+  <span class="n">ws</span> <span class="o">=</span> <span class="no">EM</span><span class="o">::</span><span class="no">WebSocketClient</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">"ws://server/path"</span><span class="p">)</span>
+
+  <span class="n">ws</span><span class="o">.</span><span class="n">onopen</span> <span class="k">do</span>
+    <span class="c1"># fire away</span>
+  <span class="k">end</span>
+
+  <span class="n">ws</span><span class="o">.</span><span class="n">onclose</span> <span class="k">do</span> <span class="o">|</span><span class="n">code</span><span class="p">,</span> <span class="n">explain</span><span class="o">|</span>
+    <span class="c1"># could be good, or not</span>
+  <span class="k">end</span>
+
+  <span class="n">ws</span><span class="o">.</span><span class="n">onping</span> <span class="k">do</span> <span class="o">|</span><span class="n">msg</span><span class="o">|</span>
+    <span class="c1"># we automatically pong, but this is here</span>
+  <span class="k">end</span>
+
+  <span class="n">ws</span><span class="o">.</span><span class="n">onerror</span> <span class="k">do</span> <span class="o">|</span><span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="o">|</span>
+    <span class="c1"># errors close the connection (per spec), but you can at</span>
+    <span class="c1"># least learn why with this</span>
+  <span class="k">end</span>
+
+  <span class="n">ws</span><span class="o">.</span><span class="n">ping</span> <span class="s2">"ping"</span>
+
+  <span class="n">ws</span><span class="o">.</span><span class="n">onpong</span> <span class="k">do</span> <span class="o">|</span><span class="n">msg</span><span class="o">|</span>
+    <span class="c1"># mes -&gt; what you called ping with</span>
+  <span class="k">end</span>
+
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<h2>Streaming API (Design Only)</h2>
+
+<p>Thoughts appreciated.</p>
+
+<div class="highlight">
+<pre>
+<span class="c1"># streaming in</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">onstream</span> <span class="k">do</span> <span class="o">|</span><span class="n">stream</span><span class="o">|</span>
+
+  <span class="c1"># stream started</span>
+  <span class="c1"># stream.binary?</span>
+
+  <span class="n">stream</span><span class="o">.</span><span class="n">ondata</span> <span class="k">do</span> <span class="o">|</span><span class="n">chunk</span><span class="o">|</span>
+    <span class="c1"># ...</span>
+  <span class="k">end</span>
+
+  <span class="n">stream</span><span class="o">.</span><span class="n">onclose</span> <span class="k">do</span>
+    <span class="c1"># stream finished</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># streaming out</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">stream</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">stream</span><span class="o">|</span>
+  <span class="mi">100</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+    <span class="n">stream</span> <span class="o">&lt;&lt;</span> <span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="n">pack</span><span class="p">(</span><span class="s2">"N"</span><span class="p">)</span>
+  <span class="k">end</span>
+  <span class="n">stream</span><span class="o">.</span><span class="n">close</span>
+<span class="k">end</span>
+
+</pre>
+</div>
+
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
