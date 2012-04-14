@@ -4,7 +4,7 @@ require "em-ws-client"
 
 spec = Gem::Specification.new do |s|
   s.name = "em-ws-client"
-  s.version = EM::WebSocketClient.Version
+  s.version = EM::WebSocketClient::Version
   s.date = "2012-04-14"
   s.summary = "EventMachine WebSocket Client"
   s.email = "dan@shove.io"
