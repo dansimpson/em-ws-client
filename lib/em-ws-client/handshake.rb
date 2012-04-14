@@ -2,7 +2,7 @@
 
 module EventMachine::WebSocketCodec
 
-  # Responsbile for generating the request and
+  # Internal: Responsbile for generating the request and
   # validating the response
   class Handshake
 

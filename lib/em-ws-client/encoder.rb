@@ -1,7 +1,9 @@
 # encoding: UTF-8
 
 module EventMachine::WebSocketCodec
-    
+  
+  # Internal: Encodes messages into WebSocket frames
+  # based on RFC 6455
   class Encoder
 
     include Protocol
@@ -14,8 +16,16 @@ module EventMachine::WebSocketCodec
 
       packr = "CC"
 
+      if opcode == TEXT_FRAME
+        data.force_encoding("UTF-8")
+
+        if !data.valid_encoding?
+          raise "Invalid UTF!"
+        end
+      end
+
       # append frame length and mask bit 0x80
-      len = data ? data.size : 0
+      len = data ? data.bytesize : 0
       if len <= 125
         frame << (len | 0x80)
       elsif len < 65536

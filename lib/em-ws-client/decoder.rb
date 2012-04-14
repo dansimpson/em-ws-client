@@ -2,21 +2,18 @@
 
 module EventMachine::WebSocketCodec
 
-  # A WebSocket frame decoder based on
-  # RFC 6455
+  # Internal: A WebSocket frame decoder 
+  # based on RFC 6455
   class Decoder
 
     include Protocol
 
-    def initialize debug=false
+    def initialize
       @fragmented = false
       @buffer = ""
-      @chunks = ""
-      @debug  = debug
-
+      @chunks = nil
       @callbacks = {}
     end
-
 
     def onclose &block; @callbacks[:close] = block; end
     def onping &block; @callbacks[:ping] = block; end
@@ -24,10 +21,15 @@ module EventMachine::WebSocketCodec
     def onframe &block; @callbacks[:frame] = block; end
     def onerror &block; @callbacks[:error] = block; end
 
-    # Decode a WebSocket frame
-    # +data+ the frame data
-    # returns false if the packet is incomplete
-    # and a decoded message otherwise
+    # Public: Feed the decoder raw data from the wire
+    # 
+    # data - The raw websocket frame data
+    #
+    # Examples
+    #
+    #   decoder << raw
+    #
+    # Returns nothing
     def << data
 
       # put the data into the buffer, as
@@ -83,7 +85,7 @@ module EventMachine::WebSocketCodec
         end
       end
 
-      # spare no bytes hybi!
+      # Get the actual size of the payload
       if length > 125
         if length == 126
           length = @buffer.unpack("@#{offset}n").first
@@ -110,12 +112,11 @@ module EventMachine::WebSocketCodec
 
       # Unmask the data if it"s masked
       if masked
-        payload.size.times do |i|
+        payload.bytesize.times do |i|
           payload[i] = ((payload[i] ^ (key >> ((3 - (i % 4)) * 8))) & 0xFF)
         end
       end
       
-      # finally, extract the message!
       payload = payload.pack("C*")
 
       case opcode
@@ -127,23 +128,17 @@ module EventMachine::WebSocketCodec
           return emit :error, 1002, "Unexepected continuation"
         end
 
-        # Validate the UTF for fast failing.  This won't catch
-        # boundary errors, so we need to do some more work
         if @fragmented == :text
-          unless encode(payload).valid_encoding?
-            return emit :error, 1007, "Invalid UTF"
-          end
+          @chunks << payload.force_encoding("UTF-8")
+        else
+          @chunks << payload
         end
 
-        @chunks << payload
         if fin
+          if @fragmented == :text && !valid_utf8?(@chunks)
+            return emit :error, 1007, "Invalid UTF"
+          end
 
-          # TODO: Boundary validate
-          # if @fragmented == :text
-          #   unless encode(@chunks).valid_encoding?
-          #     return emit :error, 1007, "Invalid UTF"
-          #   end
-          # end
           emit :frame, @chunks, @fragmented == :binary
           @chunks = nil
           @fragmented = false
@@ -156,16 +151,15 @@ module EventMachine::WebSocketCodec
           return emit :error, 1002, "Unexepected frame"
         end
 
-        # validate the text as UTF
-        unless encode(payload).valid_encoding?
-          return emit :error, 1007, "Invalid UTF"
-        end  
-
         # emit or buffer
         if fin
+          unless valid_utf8?(payload)
+            return emit :error, 1007, "Invalid UTF Hmm"
+          end
+
           emit :frame, payload, false
         else
-          @chunks = payload
+          @chunks = payload.force_encoding("UTF-8")
           @fragmented = :text
         end
 
@@ -185,11 +179,12 @@ module EventMachine::WebSocketCodec
         end
 
       when CLOSE
-        code = payload == nil ? 1000 : payload.unpack("n").first
-        if !valid_close_code? code
-          code = 1002
+        code, explain = payload.unpack("nA*")
+        if explain && !valid_utf8?(explain)
+          emit :close, 1007
+        else
+          emit :close, response_close_code(code)
         end
-        emit :close, code
 
       when PING
         emit :ping, payload
@@ -210,7 +205,7 @@ module EventMachine::WebSocketCodec
 
     private
 
-    # trigger event for upstream
+    # trigger event for listener
     def emit event, *args
       if @callbacks.key?(event)
         @callbacks[event].call(*args)
@@ -219,22 +214,23 @@ module EventMachine::WebSocketCodec
 
     # Determine if the close code we received is valid
     # and close if it's not
-    def valid_close_code? code
+    def response_close_code code
       case code
       when 1000,1001,1002,1003,1007,1008,1009,1010,1011
-        true
+        1000
       when 3000..3999
-        true
+        1000
       when 4000..4999
-        true
+        1000
+      when nil
+        1000
       else
-        false
+        1002
       end
     end
 
-    # Force the encoding of the data to UTF for strings
-    def encode data
-      data.force_encoding("UTF-8")
+    def valid_utf8? str
+      str.force_encoding("UTF-8").valid_encoding?
     end
 
   end

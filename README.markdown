@@ -1,12 +1,16 @@
-# EM WebSocket Client
-Rfc6455 WebSocket client for ruby.  Almost 100% Spec compliant (see autobahn tests).
+em-ws-client
+------------
+RFC 6455 Compliant WebSocket client for ruby.  See report for compliance: [View Autobahn Report][0]
 
-# Installing
+Installation
+------------
+
 ```bash
 $ gem install em-ws-client
 ```
 
-# Establishing a Connection
+Sending and Receiving Messages
+------------------------------
 
 ```ruby
 require "em-ws-client"
@@ -14,45 +18,91 @@ require "em-ws-client"
 EM.run do
 
   # Establish the connection
-  connection = EM::WebSocketClient.new("ws://server/path")
+  ws = EM::WebSocketClient.new("ws://server/path")
 
-  connection.onopen do
-    # Handle open event
+  # Simple echo
+  # If the binary flag is set, then
+  # the message is a string encoded as ASCII_8BIT
+  # otherwise it's encoded as UTF-8
+  ws.onmessage do |msg, binary|
+    conn.send_message msg, binary
   end
 
-  conn.onclose do
-    # Handle close event
+  # Send a text message
+  ws.send_message "hello!"
+
+  # Send a binary message
+  ws.send_message [2,3,4].pack("NnC"), true
+
+end
+```
+
+Control Events
+--------------
+
+```ruby
+require "em-ws-client"
+
+EM.run do
+
+  # Establish the connection
+  ws = EM::WebSocketClient.new("ws://server/path")
+
+  ws.onopen do
+    # fire away
   end
 
-  # Echo!
-  conn.onmessage do |msg, binary|
-    if binary
-      conn.send_data msg, true
-    else
-      conn.send_data msg
-    end
+  ws.onclose do |code, explain|
+    # could be good, or not
   end
 
-  conn.onping do |msg|
-    # we automatically respond, but if you want...
+  ws.onping do |msg|
+    # we automatically pong, but this is here
   end
 
-  conn.onerror do |code, message|
+  ws.onerror do |code, message|
+    # errors close the connection (per spec), but you can at
+    # least learn why with this
+  end
+
+  ws.ping "ping"
+
+  ws.onpong do |msg|
+    # mes -> what you called ping with
   end
 
 end
 ```
 
-# Sending Data
-Send data as a string.  It can be JSON, CSV, etc.  As long
-as you can serialize it.
+Streaming API (Design Only)
+---------------------------
+Thoughts appreciated.
 
 ```ruby
-connection.send_data "message"
 
-# JSON
-connection.send_data {
-  :category => "fun",
-  :message => "times"
-}.to_json
+# streaming in
+ws.onstream do |stream|
+  
+  # stream started
+  # stream.binary?
+
+  stream.ondata do |chunk|
+    # ...
+  end
+
+  stream.onclose do
+    # stream finished
+  end
+end
+
+# streaming out
+ws.stream(true) do |stream|
+  100.times do |i|
+    stream << [i].pack("N")
+  end
+  stream.close
+end
+
 ```
+
+[0]: http://dansimpson.github.com/em-ws-client/autobahn/report.html

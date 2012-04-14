@@ -30,7 +30,7 @@ EM.run do
       ws = EM::WebSocketClient.new "ws://localhost:9001/runCase?&case=#{$current}&agent=em-ws-client"
       ws.onmessage do |data, binary|
         begin
-          ws.send_data data, binary
+          ws.send_message data, binary
         rescue Exception => err
           $count = 0
           puts err
@@ -43,7 +43,7 @@ EM.run do
       end
 
       ws.onerror do |code, message|
-        #puts "Error: #{code} - #{message}"
+        puts "Error: #{code} - #{message}"
       end
 
       ws.onpong do |data|

@@ -1,9 +1,8 @@
 require "rubygems"
 require "eventmachine"
 require "uri"
-require "digest/sha1"
 require "base64"
-require "iconv"
+require "digest/sha1"
 
 module EventMachine
   module WebSocketCodec
